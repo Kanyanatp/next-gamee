@@ -34,6 +34,25 @@ app.get('/books/:id', async (req, res) => {
   res.json(book);
 });
 
+app.post('/books/:id/reviews', async (req, res) => {
+  const bookId = Number(req.params.id);
+  const { rating, content } = req.body;
+
+  const book = await prisma.book.findUnique({ where: { id: bookId } });
+  if (!book) {
+    return res.status(404).json({ error: 'Book not found' });
+  }
+
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+    return res.status(400).json({ error: 'rating must be an integer 1-5' });
+  }
+
+  const review = await prisma.review.create({
+    data: { rating, content, bookId: bookId },
+  });
+  res.status(201).json(review);
+});
+
 app.listen(3000, () => {
   console.log('Server running at http://localhost:3000');
 });
