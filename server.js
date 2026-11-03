@@ -1,3 +1,5 @@
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 
@@ -51,6 +53,17 @@ app.post('/books/:id/reviews', async (req, res) => {
     data: { rating, content, bookId: bookId },
   });
   res.status(201).json(review);
+});
+
+app.post('/books/:id/cover', upload.single('cover'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'cover file is required' });
+  }
+  const book = await prisma.book.update({
+    where: { id: Number(req.params.id) },
+    data: { coverUrl: req.file.path },
+  });
+  res.json(book);
 });
 
 app.listen(3000, () => {
