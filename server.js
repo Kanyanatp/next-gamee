@@ -66,6 +66,30 @@ app.post('/books/:id/cover', upload.single('cover'), async (req, res) => {
   res.json(book);
 });
 
+app.put('/books/:id', async (req, res) => {
+  const id = Number(req.params.id);
+  const { title, author } = req.body;
+  const exists = await prisma.book.findUnique({ where: { id } });
+  if (!exists) {
+    return res.status(404).json({ error: 'Book not found' });
+  }
+  const book = await prisma.book.update({
+    where: { id },
+    data: { title, author },
+  });
+  res.json(book);
+});
+
+app.delete('/books/:id', async (req, res) => {
+  const id = Number(req.params.id);
+  const book = await prisma.book.findUnique({ where: { id } });
+  if (!book) {
+    return res.status(404).json({ error: 'Book not found' });
+  }
+  await prisma.book.delete({ where: { id } });
+  res.status(204).end();
+});
+
 app.listen(3000, () => {
   console.log('Server running at http://localhost:3000');
 });
