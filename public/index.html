@@ -1,0 +1,12 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8"><title>Books</title></head><body><h1>รายการหนังสือ</h1><ul id="list"></ul><script>
+  fetch('/books')
+    .then(res => res.json())
+    .then(books => {
+      const list = document.getElementById('list');
+      books.forEach(book => {
+        const li = document.createElement('li');
+        li.textContent = book.title; // or book.name depending on your API structure
+        list.appendChild(li);
+      });
+    });
+</script></body></html>
