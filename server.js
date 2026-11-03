@@ -90,6 +90,41 @@ app.delete('/books/:id', async (req, res) => {
   res.status(204).end();
 });
 
+app.get('/books/:id/reviews', async (req, res) => {
+  const bookId = Number(req.params.id);
+  const reviews = await prisma.review.findMany({
+    where: { bookId },
+  });
+  res.json(reviews);
+});
+
+app.put('/reviews/:id', async (req, res) => {
+  const id = Number(req.params.id);
+  const { rating, content } = req.body;
+  const exists = await prisma.review.findUnique({ where: { id } });
+  if (!exists) {
+    return res.status(404).json({ error: 'Review not found' });
+  }
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+    return res.status(400).json({ error: 'rating must be an integer 1-5' });
+  }
+  const review = await prisma.review.update({
+    where: { id },
+    data: { rating, content },
+  });
+  res.json(review);
+});
+
+app.delete('/reviews/:id', async (req, res) => {
+  const id = Number(req.params.id);
+  const review = await prisma.review.findUnique({ where: { id } });
+  if (!review) {
+    return res.status(404).json({ error: 'Review not found' });
+  }
+  await prisma.review.delete({ where: { id } });
+  res.status(204).end();
+});
+
 app.listen(3000, () => {
   console.log('Server running at http://localhost:3000');
 });
